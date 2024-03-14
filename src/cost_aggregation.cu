@@ -55,7 +55,7 @@ struct DynamicProgramming
 		for (unsigned int i = 0; i < DP_BLOCK_SIZE; ++i) { dp[i] = 0; }
 	}
 
-	__device__ void update(uint32_t *local_costs, uint32_t p1, uint32_t p2, uint32_t mask)
+	__device__ void update(uint32_t *local_costs, uint32_t p1, uint32_t p2, uint64_t mask)
 	{
 		const unsigned int lane_id = threadIdx.x % SUBGROUP_SIZE;
 
@@ -94,10 +94,13 @@ struct DynamicProgramming
 };
 
 template <unsigned int SIZE>
-__device__ unsigned int generate_mask()
+__device__ uint64_t generate_mask()
 {
-	static_assert(SIZE <= 32, "SIZE must be less than or equal to 32");
-	return static_cast<unsigned int>((1ull << SIZE) - 1u);
+	static_assert(SIZE <= 64, "SIZE must be less than or equal to 64");
+	if (SIZE == 64) {
+		return 0xFFFFFFFFFFFFFFFFull;
+	}
+	return static_cast<uint64_t>((1ull << SIZE) - 1u);
 }
 
 template <typename CENSUS_T>
@@ -141,7 +144,7 @@ __global__ void aggregate_vertical_path_kernel(
 	const unsigned int warp_id = threadIdx.x / WARP_SIZE;
 	const unsigned int group_id = threadIdx.x % WARP_SIZE / SUBGROUP_SIZE;
 	const unsigned int lane_id = threadIdx.x % SUBGROUP_SIZE;
-	const unsigned int shfl_mask =
+	const uint64_t shfl_mask =
 		generate_mask<SUBGROUP_SIZE>() << (group_id * SUBGROUP_SIZE);
 
 	const unsigned int x =
@@ -281,7 +284,7 @@ __global__ void aggregate_horizontal_path_kernel(
 	const unsigned int warp_id = threadIdx.x / WARP_SIZE;
 	const unsigned int group_id = threadIdx.x % WARP_SIZE / SUBGROUP_SIZE;
 	const unsigned int lane_id = threadIdx.x % SUBGROUP_SIZE;
-	const unsigned int shfl_mask =
+	const uint64_t shfl_mask =
 		generate_mask<SUBGROUP_SIZE>() << (group_id * SUBGROUP_SIZE);
 
 	const unsigned int y0 =
@@ -439,7 +442,7 @@ __global__ void aggregate_oblique_path_kernel(
 	const unsigned int warp_id = threadIdx.x / WARP_SIZE;
 	const unsigned int group_id = threadIdx.x % WARP_SIZE / SUBGROUP_SIZE;
 	const unsigned int lane_id = threadIdx.x % SUBGROUP_SIZE;
-	const unsigned int shfl_mask =
+	const uint64_t shfl_mask =
 		generate_mask<SUBGROUP_SIZE>() << (group_id * SUBGROUP_SIZE);
 
 	const int x0 =
@@ -650,6 +653,9 @@ void cost_aggregation(const DeviceImage& srcL, const DeviceImage& srcR, DeviceIm
 		else if (disp_size == 256) {
 			cost_aggregation_<uint32_t, 256>(srcL, srcR, dst, P1, P2, path_type, min_disp);
 		}
+		else if (disp_size == 512) {
+			cost_aggregation_<uint32_t, 512>(srcL, srcR, dst, P1, P2, path_type, min_disp);
+		}
 	}
 	else if (srcL.type == SGM_64U) {
 		if (disp_size == 64) {
@@ -660,6 +666,9 @@ void cost_aggregation(const DeviceImage& srcL, const DeviceImage& srcR, DeviceIm
 		}
 		else if (disp_size == 256) {
 			cost_aggregation_<uint64_t, 256>(srcL, srcR, dst, P1, P2, path_type, min_disp);
+		}
+		else if (disp_size == 512) {
+			cost_aggregation_<uint64_t, 512>(srcL, srcR, dst, P1, P2, path_type, min_disp);
 		}
 	}
 }

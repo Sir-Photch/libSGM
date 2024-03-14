@@ -29,7 +29,7 @@ namespace
 static constexpr unsigned int WARPS_PER_BLOCK = 8u;
 static constexpr unsigned int BLOCK_SIZE = WARPS_PER_BLOCK * WARP_SIZE;
 
-__device__ inline uint32_t pack_cost_index(uint32_t cost, uint32_t index)
+__device__ inline uint32_t pack_cost_index(uint64_t cost, uint32_t index)
 {
 	union {
 		uint32_t uint32;
@@ -50,15 +50,15 @@ __device__ int unpack_index(uint32_t packed)
 	return packed & 0xffffu;
 }
 
-using ComputeDisparity = uint32_t(*)(uint32_t, uint32_t, uint16_t*);
+using ComputeDisparity = uint32_t(*)(uint32_t, uint32_t, uint32_t*);
 
-__device__ inline uint32_t compute_disparity_normal(uint32_t disp, uint32_t cost = 0, uint16_t* smem = nullptr)
+__device__ inline uint32_t compute_disparity_normal(uint32_t disp, uint32_t cost = 0, uint32_t* smem = nullptr)
 {
 	return disp;
 }
 
 template <size_t MAX_DISPARITY>
-__device__ inline uint32_t compute_disparity_subpixel(uint32_t disp, uint32_t cost, uint16_t* smem)
+__device__ inline uint32_t compute_disparity_subpixel(uint32_t disp, uint32_t cost, uint32_t* smem)
 {
 	int subp = disp;
 	subp <<= sgm::StereoSGM::SUBPIXEL_SHIFT;
@@ -104,7 +104,7 @@ __global__ void winner_takes_all_kernel(
 		return;
 	}
 
-	__shared__ uint16_t smem_cost_sum[WARPS_PER_BLOCK][ACCUMULATION_INTERVAL][MAX_DISPARITY];
+	__shared__ uint32_t smem_cost_sum[WARPS_PER_BLOCK][ACCUMULATION_INTERVAL][MAX_DISPARITY];
 
 	uint32_t right_best[REDUCTION_PER_THREAD];
 	for(unsigned int i = 0; i < REDUCTION_PER_THREAD; ++i){
@@ -133,7 +133,7 @@ __global__ void winner_takes_all_kernel(
 							sum[i] += load_buffer[i];
 						}
 					}
-					store_uint16_vector<ACCUMULATION_PER_THREAD>(
+					store_uint32_vector<ACCUMULATION_PER_THREAD>(
 						&smem_cost_sum[warp_id][k_hi][k_lo], sum);
 				}
 #if CUDA_VERSION >= 9000
@@ -147,8 +147,8 @@ __global__ void winner_takes_all_kernel(
 				// Load sum of costs
 				const unsigned int smem_x = x1 % ACCUMULATION_INTERVAL;
 				const unsigned int k0 = lane_id * REDUCTION_PER_THREAD;
-				uint32_t local_cost_sum[REDUCTION_PER_THREAD];
-				load_uint16_vector<REDUCTION_PER_THREAD>(
+				uint64_t local_cost_sum[REDUCTION_PER_THREAD];
+				load_uint32_vector<REDUCTION_PER_THREAD>(
 					local_cost_sum, &smem_cost_sum[warp_id][smem_x][k0]);
 				// Pack sum of costs and dispairty
 				uint32_t local_packed_cost[REDUCTION_PER_THREAD];
@@ -263,6 +263,9 @@ void winner_takes_all(const DeviceImage& src, DeviceImage& dstL, DeviceImage& ds
 	}
 	else if (disp_size == 256) {
 		winner_takes_all_<256>(src, dstL, dstR, uniqueness, subpixel, path_type);
+	}
+	else if (disp_size == 512) {
+		winner_takes_all_<512>(src, dstL, dstR, uniqueness, subpixel, path_type);
 	}
 }
 

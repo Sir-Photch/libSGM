@@ -198,84 +198,92 @@ __device__ inline void store_uint8_vector<16u>(uint8_t *dest, const uint32_t *pt
 
 
 template <unsigned int N>
-__device__ inline void load_uint16_vector(uint32_t *dest, const uint16_t *ptr);
+__device__ inline void load_uint32_vector(uint64_t *dest, const uint32_t *ptr);
 
 template <>
-__device__ inline void load_uint16_vector<1u>(uint32_t *dest, const uint16_t *ptr)
+__device__ inline void load_uint32_vector<1u>(uint64_t *dest, const uint32_t *ptr)
+{
+	dest[0] = static_cast<uint64_t>(ptr[0]);
+}
+
+template <>
+__device__ inline void load_uint32_vector<2u>(uint64_t *dest, const uint32_t *ptr)
+{
+	const auto uint32x2 = load_as<uint2>(ptr);
+	dest[0] = uint32x2.x; dest[1] = uint32x2.y;
+}
+
+template <>
+__device__ inline void load_uint32_vector<4u>(uint64_t *dest, const uint32_t *ptr)
+{
+	const auto uint32x4 = load_as<uint4>(ptr);
+	dest[0] = uint32x4.x; dest[1] = uint32x4.y; dest[2] = uint32x4.z; dest[3] = uint32x4.w;
+}
+
+template <>
+__device__ inline void load_uint32_vector<8u>(uint64_t *dest, const uint32_t *ptr)
+{
+	const auto uint64x4 = load_as<ulong4>(ptr);
+	load_uint32_vector<2u>(dest + 0, reinterpret_cast<const uint32_t *>(&uint64x4.x));
+	load_uint32_vector<2u>(dest + 2, reinterpret_cast<const uint32_t *>(&uint64x4.y));
+	load_uint32_vector<2u>(dest + 4, reinterpret_cast<const uint32_t *>(&uint64x4.z));
+	load_uint32_vector<2u>(dest + 6, reinterpret_cast<const uint32_t *>(&uint64x4.w));
+}
+
+template <>
+__device__ inline void load_uint32_vector<16u>(uint64_t *dest, const uint32_t *ptr)
+{
+#pragma unroll
+  for (int i = 0; i < 16; ++i)
+    dest[i] = ptr[i];
+}
+
+
+template <unsigned int N>
+__device__ inline void store_uint32_vector(uint32_t *dest, const uint32_t *ptr);
+
+template <>
+__device__ inline void store_uint32_vector<1u>(uint32_t *dest, const uint32_t *ptr)
 {
 	dest[0] = static_cast<uint32_t>(ptr[0]);
 }
 
 template <>
-__device__ inline void load_uint16_vector<2u>(uint32_t *dest, const uint16_t *ptr)
+__device__ inline void store_uint32_vector<2u>(uint32_t *dest, const uint32_t *ptr)
 {
-	const auto uint16x2 = load_as<ushort2>(ptr);
-	dest[0] = uint16x2.x; dest[1] = uint16x2.y;
+	uint2 uint32x2;
+	uint32x2.x = static_cast<uint32_t>(ptr[0]);
+	uint32x2.y = static_cast<uint32_t>(ptr[1]);
+	store_as<uint2>(dest, uint32x2);
 }
 
 template <>
-__device__ inline void load_uint16_vector<4u>(uint32_t *dest, const uint16_t *ptr)
-{
-	const auto uint16x4 = load_as<ushort4>(ptr);
-	dest[0] = uint16x4.x; dest[1] = uint16x4.y; dest[2] = uint16x4.z; dest[3] = uint16x4.w;
-}
-
-template <>
-__device__ inline void load_uint16_vector<8u>(uint32_t *dest, const uint16_t *ptr)
-{
-	const auto uint32x4 = load_as<uint4>(ptr);
-	load_uint16_vector<2u>(dest + 0, reinterpret_cast<const uint16_t *>(&uint32x4.x));
-	load_uint16_vector<2u>(dest + 2, reinterpret_cast<const uint16_t *>(&uint32x4.y));
-	load_uint16_vector<2u>(dest + 4, reinterpret_cast<const uint16_t *>(&uint32x4.z));
-	load_uint16_vector<2u>(dest + 6, reinterpret_cast<const uint16_t *>(&uint32x4.w));
-}
-
-
-template <unsigned int N>
-__device__ inline void store_uint16_vector(uint16_t *dest, const uint32_t *ptr);
-
-template <>
-__device__ inline void store_uint16_vector<1u>(uint16_t *dest, const uint32_t *ptr)
-{
-	dest[0] = static_cast<uint16_t>(ptr[0]);
-}
-
-template <>
-__device__ inline void store_uint16_vector<2u>(uint16_t *dest, const uint32_t *ptr)
-{
-	ushort2 uint16x2;
-	uint16x2.x = static_cast<uint16_t>(ptr[0]);
-	uint16x2.y = static_cast<uint16_t>(ptr[1]);
-	store_as<ushort2>(dest, uint16x2);
-}
-
-template <>
-__device__ inline void store_uint16_vector<4u>(uint16_t *dest, const uint32_t *ptr)
-{
-	ushort4 uint16x4;
-	uint16x4.x = static_cast<uint16_t>(ptr[0]);
-	uint16x4.y = static_cast<uint16_t>(ptr[1]);
-	uint16x4.z = static_cast<uint16_t>(ptr[2]);
-	uint16x4.w = static_cast<uint16_t>(ptr[3]);
-	store_as<ushort4>(dest, uint16x4);
-}
-
-template <>
-__device__ inline void store_uint16_vector<8u>(uint16_t *dest, const uint32_t *ptr)
+__device__ inline void store_uint32_vector<4u>(uint32_t *dest, const uint32_t *ptr)
 {
 	uint4 uint32x4;
-	store_uint16_vector<2u>(reinterpret_cast<uint16_t *>(&uint32x4.x), &ptr[0]);
-	store_uint16_vector<2u>(reinterpret_cast<uint16_t *>(&uint32x4.y), &ptr[2]);
-	store_uint16_vector<2u>(reinterpret_cast<uint16_t *>(&uint32x4.z), &ptr[4]);
-	store_uint16_vector<2u>(reinterpret_cast<uint16_t *>(&uint32x4.w), &ptr[6]);
+	uint32x4.x = static_cast<uint32_t>(ptr[0]);
+	uint32x4.y = static_cast<uint32_t>(ptr[1]);
+	uint32x4.z = static_cast<uint32_t>(ptr[2]);
+	uint32x4.w = static_cast<uint32_t>(ptr[3]);
 	store_as<uint4>(dest, uint32x4);
 }
 
 template <>
-__device__ inline void store_uint16_vector<16u>(uint16_t *dest, const uint32_t *ptr)
+__device__ inline void store_uint32_vector<8u>(uint32_t *dest, const uint32_t *ptr)
 {
-	store_uint16_vector<8u>(dest + 0, ptr + 0);
-	store_uint16_vector<8u>(dest + 8, ptr + 8);
+	ulong4 uint64x4;
+	store_uint32_vector<2u>(reinterpret_cast<uint32_t *>(&uint64x4.x), &ptr[0]);
+	store_uint32_vector<2u>(reinterpret_cast<uint32_t *>(&uint64x4.y), &ptr[2]);
+	store_uint32_vector<2u>(reinterpret_cast<uint32_t *>(&uint64x4.z), &ptr[4]);
+	store_uint32_vector<2u>(reinterpret_cast<uint32_t *>(&uint64x4.w), &ptr[6]);
+	store_as<ulong4>(dest, uint64x4);
+}
+
+template <>
+__device__ inline void store_uint32_vector<16u>(uint32_t *dest, const uint32_t *ptr)
+{
+	store_uint32_vector<8u>(dest + 0, ptr + 0);
+	store_uint32_vector<8u>(dest + 8, ptr + 8);
 }
 
 } // namespace sgm
