@@ -43,7 +43,7 @@ using Parameters = std::tuple<int, int, int>;
 
 class CorrectDisparityRangeTest : public ::testing::TestWithParam<Parameters> {};
 INSTANTIATE_TEST_CASE_P(TestWithParams, CorrectDisparityRangeTest,
-	::testing::Combine(::testing::Values(64, 128, 256), ::testing::Values(0, 1), ::testing::Values(0, +16, -16)));
+	::testing::Combine(::testing::Values(64, 128, 256, 512), ::testing::Values(0, 1), ::testing::Values(0, +16, -16)));
 
 TEST_P(CorrectDisparityRangeTest, Random16U)
 {

@@ -96,11 +96,15 @@ struct DynamicProgramming
 template <unsigned int SIZE>
 __device__ uint64_t generate_mask()
 {
-	static_assert(SIZE <= 64, "SIZE must be less than or equal to 64");
-	if (SIZE == 64) {
-		return 0xFFFFFFFFFFFFFFFFull;
-	}
+	static_assert(SIZE <= 32, "SIZE must be less than or equal to 32");
+
 	return static_cast<uint64_t>((1ull << SIZE) - 1u);
+}
+
+template <>
+__device__ uint64_t generate_mask<64>()
+{
+	return 0xFFFFFFFFFFFFFFFFull;
 }
 
 template <typename CENSUS_T>

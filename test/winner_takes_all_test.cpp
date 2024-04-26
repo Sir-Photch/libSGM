@@ -29,6 +29,10 @@ static WinnerTakesAllParam params[] = {
 	{ 256, 0.95f, sgm::PathType::SCAN_4PATH, true },
 	{ 256, 0.95f, sgm::PathType::SCAN_8PATH, false },
 	{ 256, 0.95f, sgm::PathType::SCAN_8PATH, true },
+	{ 512, 0.95f, sgm::PathType::SCAN_4PATH, false },
+	{ 512, 0.95f, sgm::PathType::SCAN_4PATH, true },
+	{ 512, 0.95f, sgm::PathType::SCAN_8PATH, false },
+	{ 512, 0.95f, sgm::PathType::SCAN_8PATH, true },
 };
 
 namespace sgm

@@ -34,6 +34,9 @@ static CostAggregationParam params[] = {
 	{ sgm::SGM_32U, 256, 10, 120,  +0 },
 	{ sgm::SGM_32U, 256, 10, 120, +16 },
 	{ sgm::SGM_32U, 256, 10, 120, -16 },
+	{ sgm::SGM_32U, 512, 10, 120,  +0 },
+	{ sgm::SGM_32U, 512, 10, 120, +16 },
+	{ sgm::SGM_32U, 512, 10, 120, -16 },
 	{ sgm::SGM_64U,  64, 10, 120,  +0 },
 	{ sgm::SGM_64U,  64, 10, 120, +16 },
 	{ sgm::SGM_64U,  64, 10, 120, -16 },
@@ -43,6 +46,9 @@ static CostAggregationParam params[] = {
 	{ sgm::SGM_64U, 256, 10, 120,  +0 },
 	{ sgm::SGM_64U, 256, 10, 120, +16 },
 	{ sgm::SGM_64U, 256, 10, 120, -16 },
+	{ sgm::SGM_64U, 512, 10, 120,  +0 },
+	{ sgm::SGM_64U, 512, 10, 120, +16 },
+	{ sgm::SGM_64U, 512, 10, 120, -16 },
 };
 
 namespace sgm

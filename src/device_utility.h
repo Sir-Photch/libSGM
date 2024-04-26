@@ -223,19 +223,22 @@ __device__ inline void load_uint32_vector<4u>(uint64_t *dest, const uint32_t *pt
 template <>
 __device__ inline void load_uint32_vector<8u>(uint64_t *dest, const uint32_t *ptr)
 {
-	const auto uint64x4 = load_as<ulong4>(ptr);
-	load_uint32_vector<2u>(dest + 0, reinterpret_cast<const uint32_t *>(&uint64x4.x));
-	load_uint32_vector<2u>(dest + 2, reinterpret_cast<const uint32_t *>(&uint64x4.y));
-	load_uint32_vector<2u>(dest + 4, reinterpret_cast<const uint32_t *>(&uint64x4.z));
-	load_uint32_vector<2u>(dest + 6, reinterpret_cast<const uint32_t *>(&uint64x4.w));
+	// const auto uint64x4 = load_as<ulong4>(ptr);
+	// load_uint32_vector<2u>(dest + 0, reinterpret_cast<const uint32_t *>(&uint64x4.x));
+	// load_uint32_vector<2u>(dest + 2, reinterpret_cast<const uint32_t *>(&uint64x4.y));
+	// load_uint32_vector<2u>(dest + 4, reinterpret_cast<const uint32_t *>(&uint64x4.z));
+	// load_uint32_vector<2u>(dest + 6, reinterpret_cast<const uint32_t *>(&uint64x4.w));
+#pragma unroll
+	for (int i = 0; i < 8; ++i)
+		dest[i] = ptr[i];
 }
 
 template <>
 __device__ inline void load_uint32_vector<16u>(uint64_t *dest, const uint32_t *ptr)
 {
 #pragma unroll
-  for (int i = 0; i < 16; ++i)
-    dest[i] = ptr[i];
+  	for (int i = 0; i < 16; ++i)
+    	dest[i] = ptr[i];
 }
 
 
@@ -252,8 +255,8 @@ template <>
 __device__ inline void store_uint32_vector<2u>(uint32_t *dest, const uint32_t *ptr)
 {
 	uint2 uint32x2;
-	uint32x2.x = static_cast<uint32_t>(ptr[0]);
-	uint32x2.y = static_cast<uint32_t>(ptr[1]);
+	uint32x2.x = ptr[0];
+	uint32x2.y = ptr[1];
 	store_as<uint2>(dest, uint32x2);
 }
 
