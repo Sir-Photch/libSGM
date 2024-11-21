@@ -1,0 +1,17 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pysgm"
+version = "3.1.0"
+
+[tool.scikit-build]
+cmake.args = [
+	"-DLIBSGM_SHARED=ON",
+	"-DBUILD_PYTHON_WRAPPER=ON"
+]
+wheel.exclude = [
+	"**/*.h",
+	"**/*.cmake"
+]
