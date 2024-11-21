@@ -4,6 +4,11 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pysgm"
+authors = [
+	{name = "Oleksandr Slovak"},
+	{name = "Christoph Liebender", email = "christoph.liebender@uni-wuerzburg.de"}
+]
+license = {file = "LICENSE"}
 version = "3.1.0"
 
 [tool.scikit-build]
