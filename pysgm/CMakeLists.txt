@@ -1,4 +1,5 @@
-find_package(pybind11 REQUIRED)
+find_package(Python COMPONENTS Development Interpreter)
+find_package(pybind11 CONFIG)
 
 pybind11_add_module(pysgm MODULE "pysgm.cpp")
 target_include_directories(pysgm PRIVATE "${PROJECT_SOURCE_DIR}/include")
@@ -8,9 +9,7 @@ if(BUILD_OPENCV_WRAPPER)
     target_link_libraries(pysgm PRIVATE ${OpenCV_LIBS})
 endif()
 
-set_target_properties(pysgm
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/pysgm"
-        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/pysgm"
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/pysgm"
-        )
+install(
+    TARGETS pysgm
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages
+)

@@ -29,7 +29,7 @@ sgm = pysgm.StereoSGM(width=width, height=height, disparity_size=int(disp_size),
 
 sgm.execute(I1_ptr, I2_ptr, disp_ptr)
 
-mask = disp == np.uint8(sgm.get_invalid_disparity())
+mask = disp == np.int16(sgm.get_invalid_disparity())
 disp = (255. * disp / disp_size)
 
 disp_color = cv2.applyColorMap(disp.astype("uint8"), cv2.COLORMAP_JET)
