@@ -9,7 +9,11 @@ authors = [
 	{name = "Christoph Liebender", email = "christoph.liebender@uni-wuerzburg.de"}
 ]
 license = {file = "LICENSE"}
+readme  = "README.md"
 version = "3.1.0"
+
+[project.urls]
+Repository = "https://github.com/fixstars/libSGM.git"
 
 [tool.scikit-build]
 cmake.args = [
